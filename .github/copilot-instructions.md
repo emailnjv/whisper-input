@@ -2,7 +2,7 @@
 
 whisper-input is a Python application that transcribes voice to text using OpenAI Whisper. It records audio from your microphone, transcribes it using AI, and types the result into the currently focused text field. The application is packaged using NIX flakes for dependency management and cross-platform distribution.
 
-Always reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.
+**ALWAYS follow these instructions first** and only fallback to additional search and context gathering if the information in the instructions is incomplete or found to be in error.
 
 ## Working Effectively
 
@@ -110,18 +110,75 @@ nix run github:quoteme/whisper-input -- --help
 - Rebuild: `nix build` -- NEVER CANCEL: Takes 3-5 minutes
 - Always test both CLI arguments and actual voice recording before committing
 
+### Making Code Changes
+When modifying the application:
+1. **Edit Core Logic**: Main functions are in `src/whisper-input.py`:
+   - `record_speech()`: Audio recording with silence detection  
+   - `transcribe_speech()`: OpenAI Whisper integration
+   - `type_text()`: Keyboard simulation output
+   - `play_beep()`: Audio feedback
+
+2. **Test Changes**: Always run validation commands first:
+   ```bash
+   # Quick syntax check
+   python3 -m py_compile src/whisper-input.py
+   
+   # Test argument parsing  
+   cd src && python3 whisper-input.py --help
+   ```
+
+3. **Full Testing**: Use development environment:
+   ```bash
+   nix develop  # NEVER CANCEL: Takes 1-2 minutes
+   cd src && python3 whisper-input.py --silence_duration 2 --beep
+   ```
+
+4. **Dependency Changes**: If modifying `flake.nix`:
+   - Edit the Python packages list (lines 17-41)
+   - Test: `nix flake check` -- Takes 30-60 seconds
+   - Rebuild: `nix build` -- NEVER CANCEL: Takes 3-5 minutes
+
 ### Repository Structure
 ```
 .
-├── flake.nix              # NIX package definition with Python dependencies
-├── flake.lock            # Locked dependency versions
-├── readme.md             # Basic usage instructions
+├── .github/
+│   └── copilot-instructions.md  # This instructions file
+├── flake.nix                    # NIX package definition with Python dependencies
+├── flake.lock                   # Locked dependency versions
+├── readme.md                    # Basic usage instructions
 └── src/
-    ├── whisper-input.py  # Main application (93 lines)
-    └── icons/            # Notification icons
-        ├── speaking.png  # "Start Speaking" notification
-        ├── silence.png   # "Processing" notification
-        └── thinking.png  # "Complete" notification
+    ├── whisper-input.py         # Main application (93 lines)
+    └── icons/                   # Notification icons
+        ├── speaking.png         # "Start Speaking" notification
+        ├── silence.png          # "Processing" notification
+        └── thinking.png         # "Complete" notification
+```
+
+### Quick Validation Commands
+Run these to verify repository state without full execution:
+```bash
+# Verify file structure
+ls -la src/
+wc -l src/whisper-input.py  # Should show 93 lines
+
+# Test argument parsing (safe - no dependencies needed)
+cd src && python3 -c "
+import argparse
+parser = argparse.ArgumentParser(description='Speech-to-Text with Silence Threshold')
+parser.add_argument('--silence_duration', type=int, default=5)
+parser.add_argument('--beep', action='store_true')
+parser.print_help()
+"
+# Expected output:
+# usage: -c [-h] [--silence_duration SILENCE_DURATION] [--beep]
+# Speech-to-Text with Silence Threshold
+# options:
+#   -h, --help            show this help message and exit
+#   --silence_duration SILENCE_DURATION
+#   --beep
+
+# Verify NIX flake structure
+grep -A 2 -B 2 "whisper-input" flake.nix
 ```
 
 ### Key Dependencies
@@ -144,3 +201,11 @@ nix run github:quoteme/whisper-input -- --help
 - Whisper "base" model provides good balance of speed vs accuracy
 - Recording stops automatically based on silence detection
 - Application uses temporary files in system temp directory
+- Always use timeout values of 60+ minutes for builds and 20+ minutes for package installations
+
+### Remote Repository Information
+- Primary repository: `github:quoteme/whisper-input` (original)
+- Current repository: `github:emailnjv/whisper-input` (fork)
+- Use the `github:quoteme/whisper-input` reference for `nix run` commands
+- Main branch: `master`
+- No CI/CD workflows currently configured
