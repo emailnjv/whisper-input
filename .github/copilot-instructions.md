@@ -7,9 +7,15 @@ whisper-input is a Python application that transcribes voice to text using OpenA
 ## Working Effectively
 
 ### Primary Method: NIX Flakes (Recommended)
-- Install NIX package manager:
-  - `curl -L https://nixos.org/nix/install | sh`
-  - `source ~/.nix-profile/etc/profile.d/nix.sh`
+- Install NIX package manager (if not already installed):
+  ```bash
+  # Verify NIX availability first
+  nix --version || {
+    # Install NIX if not available
+    curl -L https://nixos.org/nix/install | sh
+    source ~/.nix-profile/etc/profile.d/nix.sh
+  }
+  ```
 - Run the application directly:
   - `nix run github:quoteme/whisper-input` -- NEVER CANCEL: First run takes 5-10 minutes for dependency download and Whisper model download (~150MB). Set timeout to 15+ minutes.
 - Build locally for development:
@@ -103,6 +109,11 @@ nix run github:quoteme/whisper-input -- --help
    - NIX builds require internet access
    - On older systems, try: `nix --experimental-features 'nix-command flakes' run github:quoteme/whisper-input`
 
+5. **Connectivity and Version Checks**:
+   - Check latest Whisper version: `curl -s https://api.github.com/repos/openai/whisper/releases/latest | grep '"tag_name"'`
+   - Verify repository access: `curl -s https://api.github.com/repos/quoteme/whisper-input | grep '"clone_url"'`
+   - Test NIX repository: `curl -s --connect-timeout 5 https://nixos.org/ > /dev/null && echo "NIX repos available"`
+
 ### Development Workflow
 - Make changes to `src/whisper-input.py`
 - Test in development shell: `nix develop` then `python3 src/whisper-input.py`
@@ -179,9 +190,31 @@ parser.print_help()
 
 # Verify NIX flake structure
 grep -A 2 -B 2 "whisper-input" flake.nix
+
+# Test network connectivity to required services
+curl -s --connect-timeout 5 --max-time 10 https://nixos.org/ > /dev/null && echo "✓ NIX repository accessible" || echo "✗ NIX repository not accessible"
+curl -s --connect-timeout 5 --max-time 10 https://api.github.com/repos/openai/whisper/releases/latest > /dev/null && echo "✓ Whisper API accessible" || echo "✗ Whisper API not accessible"
+curl -s --connect-timeout 5 --max-time 10 https://api.github.com/repos/quoteme/whisper-input > /dev/null && echo "✓ whisper-input repository accessible" || echo "✗ whisper-input repository not accessible"
 ```
 
-### Key Dependencies
+### Dependency and Version Management
+With network access to required APIs, you can now check versions and dependencies:
+
+```bash
+# Check latest OpenAI Whisper release
+curl -s https://api.github.com/repos/openai/whisper/releases/latest | \
+  python3 -c "import sys, json; print('Latest Whisper:', json.load(sys.stdin)['tag_name'])"
+
+# Check repository status and latest commit
+curl -s https://api.github.com/repos/quoteme/whisper-input | \
+  python3 -c "import sys, json; r=json.load(sys.stdin); print(f'Repository: {r[\"full_name\"]}'); print(f'Default branch: {r[\"default_branch\"]}'); print(f'Last updated: {r[\"updated_at\"]}')"
+
+# Verify NIX installation source integrity
+curl -s -I https://nixos.org/nix/install | grep -E "HTTP|content-length"
+```
+
+These commands help validate that all required external dependencies are accessible and up-to-date before attempting builds or installations.
+
 - **openai-whisper**: AI transcription engine (~150MB models)
 - **pyaudio**: Audio recording (requires system PortAudio library)
 - **pynput**: Keyboard simulation for text typing
