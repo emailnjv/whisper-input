@@ -111,7 +111,7 @@ nix run github:quoteme/whisper-input -- --help
 
 5. **Connectivity and Version Checks**:
    - Check latest Whisper version: `curl -s https://api.github.com/repos/openai/whisper/releases/latest | grep '"tag_name"'`
-   - Verify repository access: `curl -s https://api.github.com/repos/quoteme/whisper-input | grep '"clone_url"'`
+   - Verify repository access: `curl -s https://api.github.com/repos/emailnjv/whisper-input | grep '"clone_url"'`
    - Test NIX repository: `curl -s --connect-timeout 5 https://nixos.org/ > /dev/null && echo "NIX repos available"`
 
 ### Development Workflow
@@ -194,7 +194,7 @@ grep -A 2 -B 2 "whisper-input" flake.nix
 # Test network connectivity to required services
 curl -s --connect-timeout 5 --max-time 10 https://nixos.org/ > /dev/null && echo "✓ NIX repository accessible" || echo "✗ NIX repository not accessible"
 curl -s --connect-timeout 5 --max-time 10 https://api.github.com/repos/openai/whisper/releases/latest > /dev/null && echo "✓ Whisper API accessible" || echo "✗ Whisper API not accessible"
-curl -s --connect-timeout 5 --max-time 10 https://api.github.com/repos/quoteme/whisper-input > /dev/null && echo "✓ whisper-input repository accessible" || echo "✗ whisper-input repository not accessible"
+curl -s --connect-timeout 5 --max-time 10 https://api.github.com/repos/emailnjv/whisper-input > /dev/null && echo "✓ whisper-input repository accessible" || echo "✗ whisper-input repository not accessible"
 ```
 
 ### Dependency and Version Management
@@ -206,7 +206,7 @@ curl -s https://api.github.com/repos/openai/whisper/releases/latest | \
   python3 -c "import sys, json; print('Latest Whisper:', json.load(sys.stdin)['tag_name'])"
 
 # Check repository status and latest commit
-curl -s https://api.github.com/repos/quoteme/whisper-input | \
+curl -s https://api.github.com/repos/emailnjv/whisper-input | \
   python3 -c "import sys, json; r=json.load(sys.stdin); print(f'Repository: {r[\"full_name\"]}'); print(f'Default branch: {r[\"default_branch\"]}'); print(f'Last updated: {r[\"updated_at\"]}')"
 
 # Verify NIX installation source integrity
