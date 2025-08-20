@@ -1,4 +1,6 @@
 {
+  description = "Voice-to-text transcription tool using OpenAI Whisper";
+
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-utils = {
@@ -13,7 +15,7 @@
           inherit system;
         };
         myPython =
-          (pkgs.python310.withPackages
+          (pkgs.python312.withPackages
             (ps: with ps; [
               openai-whisper
               pyaudio
@@ -48,27 +50,39 @@
 
         apps.whisper-input = {
           type = "app";
-          program = "${defaultPackage}/bin/whisper-input";
+          program = "${packages.whisper-input}/bin/whisper-input";
         };
 
         devShells.default = pkgs.mkShell {
           buildInputs = [ dependencies ];
         };
 
-        defaultPackage = pkgs.stdenv.mkDerivation {
-          name = "defaultPackage";
+        defaultPackage = packages.whisper-input;
+        
+        packages.whisper-input = pkgs.stdenv.mkDerivation {
+          pname = "whisper-input";
+          version = "1.0.0";
           buildInputs = dependencies;
           src = ./src;
           dontBuild = true;
           installPhase = ''
-            mkdir -p $out/bin
-            cp -r . $out
-            # add a `whisper-input` script, which just calls `python3 whisper-input.py`
-            touch $out/bin/whisper-input
-            echo "#!${pkgs.stdenv.shell}" > $out/bin/whisper-input
-            echo "${myPython}/bin/python3 $out/whisper-input.py" >> $out/bin/whisper-input
+            mkdir -p $out/bin $out/share/whisper-input
+            cp -r . $out/share/whisper-input/
+            # Create the executable script
+            cat > $out/bin/whisper-input << EOF
+            #!${pkgs.stdenv.shell}
+            exec ${myPython}/bin/python3 $out/share/whisper-input/whisper-input.py "\$@"
+            EOF
             chmod +x $out/bin/whisper-input
           '';
+          
+          meta = with pkgs.lib; {
+            description = "Voice-to-text transcription tool using OpenAI Whisper";
+            homepage = "https://github.com/emailnjv/whisper-input";
+            license = licenses.mit;
+            maintainers = [ ];
+            platforms = platforms.unix;
+          };
         };
       }
     );
