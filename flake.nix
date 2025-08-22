@@ -2,7 +2,7 @@
   description = "Voice-to-text transcription tool using OpenAI Whisper";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
     flake-utils = {
       url = "github:numtide/flake-utils";
     };
@@ -15,7 +15,7 @@
           inherit system;
         };
         myPython =
-          (pkgs.python312.withPackages
+          (pkgs.python311.withPackages
             (ps: with ps; [
               openai-whisper
               pyaudio
@@ -25,6 +25,7 @@
               # pydbus
               plyer
               termcolor
+              numba
               (
                 buildPythonPackage
                   rec {
