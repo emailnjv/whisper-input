@@ -1,3 +1,4 @@
+import subprocess
 import whisper
 import pyaudio
 import wave
@@ -65,6 +66,7 @@ def transcribe_speech(file_path, beep_enabled=True):
 
 def type_text(text):
     keyboard = Controller()
+    subprocess.run(["copyq", "add", text])
     keyboard.type(text)
 
 # Argument parsing
@@ -83,6 +85,7 @@ play_beep(sound_type=1, beep_enabled=args.beep)
 # Step 2 and 3: Record and transcribe speech
 speech_file = record_speech(silence_duration=args.silence_duration, beep_enabled=args.beep)
 transcribed_text = transcribe_speech(speech_file, beep_enabled=args.beep)
+print(colored(transcribed_text, 'yellow'))
 
 # Step 4: Type the text
 type_text(transcribed_text)

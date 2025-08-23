@@ -76,7 +76,7 @@
             # Create the executable script
             cat > $out/bin/whisper-input << EOF
             #!${pkgs.stdenv.shell}
-            exec ${myPython}/bin/python3 $out/share/whisper-input/whisper-input.py "\$@"
+            exec ${myPython}/bin/python3 $out/share/whisper-input/whisper-input.py --silence_duration 2"\$@"
             EOF
             chmod +x $out/bin/whisper-input
           '';
