@@ -2,7 +2,7 @@ import subprocess
 import whisper
 import pyaudio
 import wave
-import audioop
+import numpy as np
 import time
 from pynput.keyboard import Key, Controller
 from plyer import notification
@@ -15,6 +15,17 @@ import beepy
 def play_beep(sound_type, beep_enabled):
     if beep_enabled:
         beepy.beep(sound_type)
+
+
+def calculate_chunk_rms_numpy(data):
+    """Calculate RMS using numpy - fast and efficient"""
+    # Convert bytes to numpy array of 16-bit signed integers
+    samples = np.frombuffer(data, dtype=np.int16)
+
+    # Calculate RMS
+    rms = np.sqrt(np.mean(samples.astype(np.float64) ** 2))
+
+    return rms
 
 def record_speech(silence_threshold=500, silence_duration=10, beep_enabled=True):
     icon = os.path.join(os.path.dirname(__file__), 'icons', 'speaking.png')
@@ -32,7 +43,7 @@ def record_speech(silence_threshold=500, silence_duration=10, beep_enabled=True)
         frames.append(data)
 
         # Check volume
-        rms = audioop.rms(data, 2)
+        rms = calculate_chunk_rms_numpy(data)
         if rms > silence_threshold:
             last_sound_time = time.time()
 
