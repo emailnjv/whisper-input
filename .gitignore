@@ -130,3 +130,6 @@ result-*
 
 # Whisper model cache
 .cache/
+
+# IDE settings
+.idea/

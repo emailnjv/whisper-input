@@ -27,10 +27,12 @@
               termcolor
               numba
               (
-                buildPythonPackage
+                ps.buildPythonPackage
                   rec {
                     pname = "beepy";
                     version = "1.0.9";
+                    pyproject = true;
+                    build-system = [ ps.setuptools ];
                     src = fetchPypi {
                       inherit pname version;
                       sha256 = "sha256-BbLWeJq7Q5MAaeHZalbJ6LBJg3jgl4TP6aHewCNo/Ks=";
@@ -55,18 +57,16 @@
 
         apps.whisper-input = {
           type = "app";
-          program = "${packages.whisper-input}/bin/whisper-input";
+          program = "${packages.default}/bin/whisper-input";
         };
 
         devShells.default = pkgs.mkShell {
           buildInputs = [ dependencies ];
         };
 
-        defaultPackage = packages.whisper-input;
-        
-        packages.whisper-input = pkgs.stdenv.mkDerivation {
+        packages.default = pkgs.stdenv.mkDerivation {
           pname = "whisper-input";
-          version = "1.0.0";
+          version = "1.0.2";
           buildInputs = dependencies;
           src = ./src;
           dontBuild = true;
